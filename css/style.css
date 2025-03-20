@@ -558,6 +558,7 @@ body {
 
 .menu-item.active {
     background-color: var(--menu-active);
+    border-radius: 20px
     color: white;
 }
 
