@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Lofi Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f7;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .player {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .track-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .tracks {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .track-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .track-item:hover {
+            background-color: #f0f0f0;
+        }
+        .track-item.active {
+            background-color: #e6f2ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lofi Player</h1>
+
+    <div class="player">
+        <div class="track-info">
+            <h2 id="currentTitle">No track selected</h2>
+            <p id="currentArtist"></p>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn">Previous</button>
+            <button id="playBtn">Play</button>
+            <button id="nextBtn">Next</button>
+        </div>
+
+        <audio id="player" controls style="width: 100%"></audio>
+    </div>
+
+    <div class="tracks">
+        <h3>Tracks</h3>
+        <div id="trackList">
+            <!-- Tracks will be added here -->
+        </div>
+    </div>
+
+    <script>
+        // Simple player logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const player = document.getElementById('player');
+            const playBtn = document.getElementById('playBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const trackList = document.getElementById('trackList');
+            const currentTitle = document.getElementById('currentTitle');
+            const currentArtist = document.getElementById('currentArtist');
+
+            // Track data
+            const tracks = [
+                {
+                    title: "Midnight Study Session",
+                    artist: "Chillhop Music",
+                    file: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_1bc7f5ffd7.mp3"
+                },
+                {
+                    title: "Coffee Shop Ambience",
+                    artist: "Lo-Fi Beats",
+                    file: "https://cdn.pixabay.com/download/audio/2022/05/16/audio_fedc4feb0c.mp3"
+                },
+                {
+                    title: "Dreamy Nights",
+                    artist: "Chill Vibes",
+                    file: "https://cdn.pixabay.com/download/audio/2022/10/31/audio_946bc8fcde.mp3"
+                },
+                {
+                    title: "Peaceful Rain",
+                    artist: "Ambient Sounds",
+                    file: "https://cdn.pixabay.com/download/audio/2021/11/13/audio_cb4f1212a9.mp3"
+                },
+                {
+                    title: "Urban Twilight",
+                    artist: "Beats Collective",
+                    file: "https://cdn.pixabay.com/download/audio/2022/10/25/audio_e2aca7c92b.mp3"
+                }
+            ];
+
+            let currentTrack = 0;
+            let isPlaying = false;
+
+            // Build track list
+            tracks.forEach((track, index) => {
+                const trackItem = document.createElement('div');
+                trackItem.className = 'track-item';
+                if (index === 0) trackItem.classList.add('active');
+                trackItem.textContent = `${track.title} - ${track.artist}`;
+                trackItem.addEventListener('click', () => {
+                    loadTrack(index);
+                    playTrack();
+                });
+                trackList.appendChild(trackItem);
+            });
+
+            // Load initial track
+            loadTrack(0);
+
+            // Load track function
+            function loadTrack(index) {
+                currentTrack = index;
+                player.src = tracks[index].file;
+                currentTitle.textContent = tracks[index].title;
+                currentArtist.textContent = tracks[index].artist;
+
+                // Update active track
+                document.querySelectorAll('.track-item').forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                // Update play button
+                isPlaying = false;
+                playBtn.textContent = 'Play';
+            }
+
+            // Play function
+            function playTrack() {
+                player.play().then(() => {
+                    isPlaying = true;
+                    playBtn.textContent = 'Pause';
+                }).catch(err => {
+                    console.error("Error playing:", err);
+                    alert("Error playing audio. Try clicking play directly on the audio control.");
+                });
+            }
+
+            // Pause function
+            function pauseTrack() {
+                player.pause();
+                isPlaying = false;
+                playBtn.textContent = 'Play';
+            }
+
+            // Previous track
+            prevBtn.addEventListener('click', () => {
+                let index = currentTrack - 1;
+                if (index < 0) index = tracks.length - 1;
+                loadTrack(index);
+                if (isPlaying) playTrack();
+            });
+
+            // Next track
+            nextBtn.addEventListener('click', () => {
+                let index = currentTrack + 1;
+                if (index >= tracks.length) index = 0;
+                loadTrack(index);
+                if (isPlaying) playTrack();
+            });
+
+            // Play/Pause toggle
+            playBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    pauseTrack();
+                } else {
+                    playTrack();
+                }
+            });
+
+            // When track ends, play next
+            player.addEventListener('ended', () => {
+                let index = currentTrack + 1;
+                if (index >= tracks.length) index = 0;
+                loadTrack(index);
+                playTrack();
+            });
+        });
+    </script>
+</body>
+</html>
